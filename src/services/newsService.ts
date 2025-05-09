@@ -1,4 +1,3 @@
-
 import { APIStory, APIStoryResponse, NewsStory } from '@/types/news';
 import { toast } from '@/components/ui/use-toast';
 
@@ -187,7 +186,7 @@ export const getTopStories = async (forceRefresh: boolean = false): Promise<News
     console.log('Fetching fresh stories...');
     
     try {
-      const data = await fetchData<APIStory[]>(`${API_ENDPOINT}`, '?limit=20');
+      const data = await fetchData<APIStory[]>(`${API_ENDPOINT}`, '?limit=20`);
       
       if (!Array.isArray(data) || data.length === 0) {
         throw new Error('No stories found in API response');
