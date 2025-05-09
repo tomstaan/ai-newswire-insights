@@ -6,13 +6,6 @@ const API_ENDPOINT = 'https://newswire-story-recommendation.staging.storyful.com
 const STORIES_CACHE_KEY = 'newswire_stories_cache';
 const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes
 
-// List of CORS proxies to try
-const CORS_PROXIES = [
-  'https://api.allorigins.win/raw?url=',
-  'https://corsproxy.io/?',
-  'https://cors-anywhere.herokuapp.com/'
-];
-
 // Utility function to handle errors
 const handleErrors = async (response: Response) => {
   if (!response.ok) {
@@ -23,34 +16,25 @@ const handleErrors = async (response: Response) => {
   return response;
 };
 
-// Function to fetch data from the API with retries through different proxies
+// Function to fetch data from the API
 const fetchData = async <T>(endpoint: string, params?: string): Promise<T> => {
-  const targetUrl = params ? `${endpoint}${params}` : endpoint;
-  const errors: Error[] = [];
-
-  // Try each proxy in sequence
-  for (const proxy of CORS_PROXIES) {
-    try {
-      const url = `${proxy}${encodeURIComponent(targetUrl)}&_t=${Date.now()}`;
-      console.log(`Trying to fetch from: ${url}`);
-      
-      const response = await fetch(url);
-      await handleErrors(response);
-      const data = await response.json();
-      console.log(`Successfully fetched data from ${url}`);
-      return data as T;
-    } catch (error) {
-      console.error(`Error fetching with proxy ${proxy}:`, error);
-      errors.push(error as Error);
-    }
+  try {
+    const targetUrl = params ? `${endpoint}${params}` : endpoint;
+    const url = `${API_BASE_URL}${encodeURIComponent(targetUrl)}&_t=${Date.now()}`;
+    console.log(`Fetching from: ${url}`);
+    
+    const response = await fetch(url);
+    await handleErrors(response);
+    const data = await response.json();
+    console.log(`Successfully fetched data from ${url}`);
+    return data as T;
+  } catch (error) {
+    console.error(`Error fetching:`, error);
+    throw error;
   }
-
-  // If we get here, all proxies failed
-  console.error('All CORS proxies failed');
-  throw new Error(`Failed to fetch data: ${errors[0]?.message || 'Unknown error'}`);
 };
 
-// Mock data to use as fallback when all proxies fail
+// Mock data to use as fallback when API fails
 const getMockData = (storyId?: string | number): NewsStory => {
   return {
     id: storyId ? Number(storyId) : 12345,
@@ -139,6 +123,7 @@ export const fetchStoryById = async (id: string): Promise<{ story: NewsStory; si
     console.log(`Fetching story with ID: ${id}`);
     
     try {
+      // Using the same fetchData method that works on the homepage
       const data = await fetchData<APIStoryResponse>(`${API_ENDPOINT}/${id}`);
       
       // If the response has a story property, use that structure
@@ -164,7 +149,7 @@ export const fetchStoryById = async (id: string): Promise<{ story: NewsStory; si
         }
       }
     } catch (error) {
-      console.error('All API endpoints failed. Using mock data as fallback.', error);
+      console.error('API endpoint failed. Using mock data as fallback.', error);
       
       // Show toast to indicate mock data is being used
       toast({
@@ -201,7 +186,7 @@ export const getTopStories = async (forceRefresh: boolean = false): Promise<News
     console.log('Fetching fresh stories...');
     
     try {
-      const data = await fetchData<APIStory[]>(`${API_ENDPOINT}`, '?limit=20');
+      const data = await fetchData<APIStory[]>(`${API_ENDPOINT}`, '?limit=20`);
       
       if (!Array.isArray(data) || data.length === 0) {
         throw new Error('No stories found in API response');
