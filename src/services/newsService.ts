@@ -37,14 +37,15 @@ const fetchData = async <T>(endpoint: string, params?: string): Promise<T> => {
 
 // Mock data to use as fallback when API fails
 const getMockData = (storyId?: string | number): NewsStory => {
+  const currentDate = new Date().toISOString();
   return {
     id: storyId ? Number(storyId) : 12345,
     title: "Example Story - API Unavailable",
     slug: "example-story",
     summary: "This is a placeholder story shown when the API is unavailable. Please try again later or check your connection.",
-    published_date: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    editorial_updated_at: new Date().toISOString(),
+    published_date: currentDate,
+    updated_at: currentDate,
+    editorial_updated_at: currentDate,
     clearance_mark: "LICENSED",
     regions: ["Global"],
     stated_location: "Internet",
@@ -84,30 +85,42 @@ const getMockStoryResult = (storyId: string | number) => {
   };
 };
 
+// Ensure valid dates in the story object
+const ensureValidDates = (story: NewsStory): NewsStory => {
+  const currentDate = new Date().toISOString();
+  return {
+    ...story,
+    published_date: story.published_date || currentDate,
+    updated_at: story.updated_at || currentDate,
+    editorial_updated_at: story.editorial_updated_at || currentDate,
+  };
+};
+
 // Transform API response to our app model
 const transformAPIStory = (apiStory: APIStory): NewsStory => {
-  return {
-    id: parseInt(apiStory.id),
-    title: apiStory.title,
-    slug: apiStory.title_slug,
-    summary: apiStory.summary,
-    published_date: apiStory.published_date,
-    updated_at: apiStory.published_date,
-    editorial_updated_at: apiStory.published_date,
-    clearance_mark: apiStory.story_mark_clearance,
+  const currentDate = new Date().toISOString();
+  return ensureValidDates({
+    id: parseInt(apiStory.id) || 0,
+    title: apiStory.title || 'Untitled Story',
+    slug: apiStory.title_slug || 'untitled',
+    summary: apiStory.summary || '',
+    published_date: apiStory.published_date || currentDate,
+    updated_at: apiStory.published_date || currentDate,
+    editorial_updated_at: apiStory.published_date || currentDate,
+    clearance_mark: apiStory.story_mark_clearance || 'LICENSED',
     lead_image: apiStory.image_url ? {
       url: apiStory.image_url,
-      filename: apiStory.title
+      filename: apiStory.title || 'image'
     } : undefined,
-    regions: apiStory.categories ? JSON.parse(apiStory.categories) : [],
-    stated_location: apiStory.stated_location,
-    media_url: apiStory.media_url,
+    regions: apiStory.categories ? JSON.parse(apiStory.categories || '[]') : [],
+    stated_location: apiStory.stated_location || '',
+    media_url: apiStory.media_url || '',
     in_trending_collection: false,
     video_providing_partner: false,
     collection_headline: '',
     collection_summary_html: '',
     lead_item: {
-      id: parseInt(apiStory.id), // Using the same ID as the story
+      id: parseInt(apiStory.id) || 0, // Using the same ID as the story
       resource_type: 'video',
       type: 'video', // Required by the interface
       media_button: {
@@ -116,7 +129,7 @@ const transformAPIStory = (apiStory: APIStory): NewsStory => {
         action: 'preview'
       }
     }
-  };
+  });
 };
 
 export const fetchStoryById = async (id: string): Promise<{ story: NewsStory; similarStories: NewsStory[] }> => {

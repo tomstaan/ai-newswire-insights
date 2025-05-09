@@ -188,6 +188,13 @@ const StoryDetail = () => {
     );
   }
 
+  // Make sure we have a valid story with all required fields
+  const safeStory = story ? {
+    ...story,
+    published_date: story.published_date || new Date().toISOString(),
+    updated_at: story.updated_at || new Date().toISOString()
+  } : null;
+
   return (
     <Layout>
       <div className="container mx-auto px-4 md:px-6 py-8">
@@ -197,38 +204,40 @@ const StoryDetail = () => {
               <div className="flex flex-wrap items-center text-sm text-newswire-mediumGray gap-4 mb-4">
                 <span>Videos</span>
                 <span className="w-1 h-1 bg-newswire-mediumGray rounded-full"></span>
-                {story?.slug && (
-                  <span>{story.slug.includes('-') ? story.slug.split('-')[0] : story.slug}</span>
+                {safeStory?.slug && (
+                  <span>{safeStory.slug.includes('-') ? safeStory.slug.split('-')[0] : safeStory.slug}</span>
                 )}
-                {story?.regions && story.regions.length > 0 && (
+                {safeStory?.regions && safeStory.regions.length > 0 && (
                   <>
                     <span className="w-1 h-1 bg-newswire-mediumGray rounded-full"></span>
-                    <span>{story.regions[0]}</span>
+                    <span>{safeStory.regions[0]}</span>
                   </>
                 )}
               </div>
               
               <h1 className="text-3xl md:text-5xl font-display font-bold leading-tight mb-4">
-                {story?.title}
+                {safeStory?.title || 'Untitled Story'}
               </h1>
               
               <div className="flex flex-wrap items-center text-sm text-newswire-mediumGray gap-4 mb-3">
-                <div className="flex items-center">
-                  <Calendar size={16} className="mr-1" />
-                  <span>{story && formatDate(story.published_date)}</span>
-                </div>
+                {safeStory?.published_date && (
+                  <div className="flex items-center">
+                    <Calendar size={16} className="mr-1" />
+                    <span>{formatDate(safeStory.published_date)}</span>
+                  </div>
+                )}
                 <div className="flex items-center">
                   <Clock size={16} className="mr-1" />
                   <span>{durationString}</span>
                 </div>
-                {story?.stated_location && (
+                {safeStory?.stated_location && (
                   <div className="flex items-center">
                     <MapPin size={16} className="mr-1" />
-                    <span>{story.stated_location}</span>
+                    <span>{safeStory.stated_location}</span>
                   </div>
                 )}
                 <div>
-                  {story && getClearanceBadge(story.clearance_mark)}
+                  {safeStory && getClearanceBadge(safeStory.clearance_mark)}
                 </div>
               </div>
               
@@ -251,11 +260,11 @@ const StoryDetail = () => {
                 </Button>
               </div>
               
-              {story?.lead_image && (
+              {safeStory?.lead_image && (
                 <div className="relative aspect-video w-full overflow-hidden mb-6 bg-newswire-lightGray rounded-lg shadow-md">
                   <img 
-                    src={story.lead_image.url} 
-                    alt={story.title} 
+                    src={safeStory.lead_image.url} 
+                    alt={safeStory.title} 
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded-md flex items-center">
@@ -268,18 +277,18 @@ const StoryDetail = () => {
                     </div>
                   </div>
                   <div className="text-sm text-newswire-mediumGray mt-2">
-                    <span className="italic">Video credit: {story.lead_image.filename}</span>
+                    <span className="italic">Video credit: {safeStory.lead_image.filename}</span>
                   </div>
                 </div>
               )}
               
               <div className="prose max-w-none">
                 <h3 className="text-xl font-semibold mb-2">Video Description</h3>
-                {story?.summary.split('\n\n').map((paragraph, index) => (
+                {safeStory?.summary?.split('\n\n').map((paragraph, index) => (
                   <p key={index} className="mb-4 text-lg leading-relaxed">
                     {paragraph}
                   </p>
-                ))}
+                )) || <p className="mb-4 text-lg leading-relaxed">No description available.</p>}
               </div>
               
               <Card className="mt-8 mb-6">
@@ -290,54 +299,58 @@ const StoryDetail = () => {
                       <FileText size={18} className="mr-2 text-newswire-mediumGray mt-0.5" />
                       <div>
                         <p className="text-sm font-medium">Video ID</p>
-                        <p className="text-sm text-newswire-mediumGray">{story?.id}</p>
+                        <p className="text-sm text-newswire-mediumGray">{safeStory?.id || 'Unknown'}</p>
                       </div>
                     </div>
                     <div className="flex items-start">
                       <Info size={18} className="mr-2 text-newswire-mediumGray mt-0.5" />
                       <div>
                         <p className="text-sm font-medium">Clearance Mark</p>
-                        <p className="text-sm text-newswire-mediumGray">{story?.clearance_mark}</p>
+                        <p className="text-sm text-newswire-mediumGray">{safeStory?.clearance_mark || 'Unknown'}</p>
                       </div>
                     </div>
-                    <div className="flex items-start">
-                      <Calendar size={18} className="mr-2 text-newswire-mediumGray mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium">Published Date</p>
-                        <p className="text-sm text-newswire-mediumGray">{story && formatDate(story.published_date)}</p>
+                    {safeStory?.published_date && (
+                      <div className="flex items-start">
+                        <Calendar size={18} className="mr-2 text-newswire-mediumGray mt-0.5" />
+                        <div>
+                          <p className="text-sm font-medium">Published Date</p>
+                          <p className="text-sm text-newswire-mediumGray">{formatDate(safeStory.published_date)}</p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-start">
-                      <Clock size={18} className="mr-2 text-newswire-mediumGray mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium">Updated At</p>
-                        <p className="text-sm text-newswire-mediumGray">{story && formatDate(story.updated_at)}</p>
+                    )}
+                    {safeStory?.updated_at && (
+                      <div className="flex items-start">
+                        <Clock size={18} className="mr-2 text-newswire-mediumGray mt-0.5" />
+                        <div>
+                          <p className="text-sm font-medium">Updated At</p>
+                          <p className="text-sm text-newswire-mediumGray">{formatDate(safeStory.updated_at)}</p>
+                        </div>
                       </div>
-                    </div>
-                    {story?.regions && (
+                    )}
+                    {safeStory?.regions && safeStory.regions.length > 0 && (
                       <div className="flex items-start">
                         <Globe size={18} className="mr-2 text-newswire-mediumGray mt-0.5" />
                         <div>
                           <p className="text-sm font-medium">Regions</p>
-                          <p className="text-sm text-newswire-mediumGray">{story.regions.join(', ')}</p>
+                          <p className="text-sm text-newswire-mediumGray">{safeStory.regions.join(', ')}</p>
                         </div>
                       </div>
                     )}
-                    {story?.lead_item && (
+                    {safeStory?.lead_item && (
                       <div className="flex items-start">
                         <Video size={18} className="mr-2 text-newswire-mediumGray mt-0.5" />
                         <div>
                           <p className="text-sm font-medium">Resource Type</p>
-                          <p className="text-sm text-newswire-mediumGray">{story.lead_item.resource_type}</p>
+                          <p className="text-sm text-newswire-mediumGray">{safeStory.lead_item.resource_type}</p>
                         </div>
                       </div>
                     )}
-                    {story?.collection_headline && (
+                    {safeStory?.collection_headline && (
                       <div className="flex items-start">
                         <FileText size={18} className="mr-2 text-newswire-mediumGray mt-0.5" />
                         <div>
                           <p className="text-sm font-medium">Collection Date</p>
-                          <p className="text-sm text-newswire-mediumGray">{story.collection_headline}</p>
+                          <p className="text-sm text-newswire-mediumGray">{safeStory.collection_headline}</p>
                         </div>
                       </div>
                     )}
@@ -345,7 +358,7 @@ const StoryDetail = () => {
                       <Video size={18} className="mr-2 text-newswire-mediumGray mt-0.5" />
                       <div>
                         <p className="text-sm font-medium">Video Providing Partner</p>
-                        <p className="text-sm text-newswire-mediumGray">{story?.video_providing_partner ? 'Yes' : 'No'}</p>
+                        <p className="text-sm text-newswire-mediumGray">{safeStory?.video_providing_partner ? 'Yes' : 'No'}</p>
                       </div>
                     </div>
                     <div className="col-span-2 mt-4">
@@ -360,12 +373,12 @@ const StoryDetail = () => {
               
               <Separator className="my-8" />
               
-              {story && <AIOverviewSection story={story} isStoryDetail={true} />}
+              {safeStory && <AIOverviewSection story={safeStory} isStoryDetail={true} />}
             </div>
           </div>
           
           <div className="lg:col-span-4">
-            <RecommendedStories stories={recommendedStories} currentStoryId={story?.id} />
+            <RecommendedStories stories={recommendedStories} currentStoryId={safeStory?.id} />
           </div>
         </div>
       </div>
