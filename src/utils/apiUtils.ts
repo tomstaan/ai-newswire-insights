@@ -1,3 +1,4 @@
+
 // Handle API request utilities
 
 // Add cache buster to URL to prevent caching
@@ -51,131 +52,33 @@ export const toJson = async (response: Response) => {
   }
 };
 
-// Enhanced list of fetch strategies with more proxy options and better error handling
-const fetchStrategies = [
-  // Direct fetch with all necessary headers to minimize CORS issues
-  async (url: string) => {
-    console.log('Trying direct fetch with access-control headers');
-    return fetch(url, {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-      credentials: 'omit' // Don't send cookies to avoid CORS preflight
-    });
-  },
-  
-  // Using fetch with minimal headers
-  async (url: string) => {
-    console.log('Trying direct fetch with minimal headers');
-    return fetch(url, {
-      method: 'GET',
-      mode: 'cors',
-    });
-  },
-  
-  // Using fetch with no-cors mode (limited but may work for some APIs)
-  async (url: string) => {
-    console.log('Trying no-cors mode fetch');
-    return fetch(url, {
-      method: 'GET',
-      mode: 'no-cors',
-    });
-  },
-  
-  // Using allorigins.win proxy (more reliable)
-  async (url: string) => {
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-    console.log('Trying allorigins.win proxy:', proxyUrl);
-    return fetch(proxyUrl);
-  },
-  
-  // Using corsproxy.io
-  async (url: string) => {
-    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-    console.log('Trying corsproxy.io proxy:', proxyUrl);
-    return fetch(proxyUrl);
-  },
-  
-  // Using cors-anywhere
-  async (url: string) => {
-    const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
-    console.log('Trying cors-anywhere proxy:', proxyUrl);
-    return fetch(proxyUrl);
-  },
-  
-  // Using thingproxy
-  async (url: string) => {
-    const proxyUrl = `https://thingproxy.freeboard.io/fetch/${url}`;
-    console.log('Trying thingproxy proxy:', proxyUrl);
-    return fetch(proxyUrl);
-  }
-];
-
-// Fetch data with multiple strategies and better error handling
+// Enhanced fetch function specifically for our proxied API endpoints
 export const fetchData = async <T>(endpoint: string, params?: string): Promise<T> => {
   const targetUrl = params ? `${endpoint}${params}` : endpoint;
-  console.log(`Starting fetch attempts to: ${targetUrl}`);
+  console.log(`Starting fetch to: ${targetUrl}`);
   
   // Add cache buster to prevent caching issues
   const urlWithCache = addCacheBuster(targetUrl);
   
-  let lastError: Error | null = null;
-  
-  // Try each strategy in sequence
-  for (let i = 0; i < fetchStrategies.length; i++) {
-    try {
-      // Add a timeout for each fetch attempt
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
-        controller.abort();
-        console.log(`Fetch strategy ${i} timed out for ${urlWithCache}`);
-      }, 15000); // 15-second timeout
-      
-      const strategy = fetchStrategies[i];
-      const response = await strategy(urlWithCache);
-      
-      clearTimeout(timeoutId); // Clear the timeout
-      
-      // For no-cors mode, we can't check status or parse JSON, so just return empty array
-      if (i === 2) { // Index of the no-cors strategy
-        console.log('No-cors mode fetch completed, but response content is opaque');
-        return [] as unknown as T;
-      }
-      
-      // Special handling for allorigins.win which returns data in a specific format
-      if (i === 3) { // Index of the allorigins.win strategy
-        await handleErrors(response);
-        const result = await toJson(response);
-        
-        if (result && typeof result === 'object' && 'contents' in result) {
-          console.log('AllOrigins proxy returned data');
-          try {
-            // Parse the contents string as JSON
-            const contents = JSON.parse(result.contents as string);
-            return contents as T;
-          } catch (e) {
-            console.log('AllOrigins returned non-JSON content:', (result.contents as string).substring(0, 100));
-            return result.contents as unknown as T;
-          }
-        }
-      }
-      
-      await handleErrors(response);
-      const data = await toJson(response);
-      console.log(`Fetch successful via strategy ${i} for: ${targetUrl}`);
-      return data as T;
-    } catch (error) {
-      console.error(`Fetch strategy ${i} failed:`, error);
-      lastError = error as Error;
-      // Continue to the next strategy
-    }
+  try {
+    // Use standard fetch with our proxy
+    const response = await fetch(urlWithCache, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      credentials: 'omit', // Don't send cookies to avoid CORS preflight
+    });
+    
+    await handleErrors(response);
+    const data = await toJson(response);
+    console.log(`Fetch successful for: ${targetUrl}`);
+    return data as T;
+  } catch (error) {
+    console.error(`Fetch failed for: ${targetUrl}`, error);
+    throw error;
   }
-  
-  console.error('All fetch strategies failed for:', targetUrl);
-  throw new Error(`Failed to fetch data after all attempts: ${lastError?.message || 'Unknown error'}`);
 };
 
 // Type definition for story data

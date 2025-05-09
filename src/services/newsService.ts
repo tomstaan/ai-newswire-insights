@@ -26,10 +26,10 @@ export const getTopStories = async (forceRefresh: boolean = false): Promise<News
       console.log('Force refresh requested, bypassing cache');
     }
     
-    console.log('Fetching fresh stories from Storyful API...');
+    console.log('Fetching fresh stories from API...');
     
     try {
-      // Try using the Storyful API
+      // Try using the Storyful API through our proxy
       console.log(`Fetching from: ${STORYFUL_API}`);
       const rawData = await fetchData<any>(STORYFUL_API);
       console.log('Raw Storyful data received:', typeof rawData, Array.isArray(rawData));
