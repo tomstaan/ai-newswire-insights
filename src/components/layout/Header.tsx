@@ -1,10 +1,18 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, Menu, User, Bell, Video, Filter, Headphones } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 const Header: React.FC = () => {
+  const navigate = useNavigate();
+  
+  const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    e.preventDefault();
+    navigate(path);
+    window.scrollTo(0, 0);
+  };
+
   return (
     <header className="border-b border-newswire-lightGray">
       <div className="container mx-auto px-4 md:px-6">
@@ -26,9 +34,13 @@ const Header: React.FC = () => {
             <Button variant="ghost" size="icon" className="md:hidden">
               <Menu size={24} />
             </Button>
-            <Link to="/" className="text-4xl font-display font-bold tracking-tight flex items-center">
+            <a 
+              href="/" 
+              className="text-4xl font-display font-bold tracking-tight flex items-center"
+              onClick={(e) => handleNavigation(e, '/')}
+            >
               NEWSWIRE
-            </Link>
+            </a>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon">
@@ -53,15 +65,87 @@ const Header: React.FC = () => {
         {/* Navigation menu */}
         <nav className="py-2 border-t border-newswire-lightGray hidden md:block">
           <ul className="flex gap-6 text-sm font-medium overflow-x-auto">
-            <li><Link to="/" className="hover:text-newswire-accent whitespace-nowrap">Home</Link></li>
-            <li><Link to="/top-stories" className="hover:text-newswire-accent whitespace-nowrap">Top Videos</Link></li>
-            <li><Link to="/trending" className="hover:text-newswire-accent whitespace-nowrap">Trending</Link></li>
-            <li><Link to="/categories" className="hover:text-newswire-accent whitespace-nowrap">Categories</Link></li>
-            <li><Link to="/regions" className="hover:text-newswire-accent whitespace-nowrap">Regions</Link></li>
-            <li><Link to="/licensed" className="hover:text-newswire-accent whitespace-nowrap">Licensed</Link></li>
-            <li><Link to="/restricted" className="hover:text-newswire-accent whitespace-nowrap">Restricted</Link></li>
-            <li><Link to="/cleared" className="hover:text-newswire-accent whitespace-nowrap">Cleared</Link></li>
-            <li><Link to="/licenses" className="hover:text-newswire-accent whitespace-nowrap">My Licenses</Link></li>
+            <li>
+              <a 
+                href="/" 
+                className="hover:text-newswire-accent whitespace-nowrap"
+                onClick={(e) => handleNavigation(e, '/')}
+              >
+                Home
+              </a>
+            </li>
+            <li>
+              <a 
+                href="/top-stories" 
+                className="hover:text-newswire-accent whitespace-nowrap"
+                onClick={(e) => handleNavigation(e, '/top-stories')}
+              >
+                Top Videos
+              </a>
+            </li>
+            <li>
+              <a 
+                href="/trending" 
+                className="hover:text-newswire-accent whitespace-nowrap"
+                onClick={(e) => handleNavigation(e, '/trending')}
+              >
+                Trending
+              </a>
+            </li>
+            <li>
+              <a 
+                href="/categories" 
+                className="hover:text-newswire-accent whitespace-nowrap"
+                onClick={(e) => handleNavigation(e, '/categories')}
+              >
+                Categories
+              </a>
+            </li>
+            <li>
+              <a 
+                href="/regions" 
+                className="hover:text-newswire-accent whitespace-nowrap"
+                onClick={(e) => handleNavigation(e, '/regions')}
+              >
+                Regions
+              </a>
+            </li>
+            <li>
+              <a 
+                href="/licensed" 
+                className="hover:text-newswire-accent whitespace-nowrap"
+                onClick={(e) => handleNavigation(e, '/licensed')}
+              >
+                Licensed
+              </a>
+            </li>
+            <li>
+              <a 
+                href="/restricted" 
+                className="hover:text-newswire-accent whitespace-nowrap"
+                onClick={(e) => handleNavigation(e, '/restricted')}
+              >
+                Restricted
+              </a>
+            </li>
+            <li>
+              <a 
+                href="/cleared" 
+                className="hover:text-newswire-accent whitespace-nowrap"
+                onClick={(e) => handleNavigation(e, '/cleared')}
+              >
+                Cleared
+              </a>
+            </li>
+            <li>
+              <a 
+                href="/licenses" 
+                className="hover:text-newswire-accent whitespace-nowrap"
+                onClick={(e) => handleNavigation(e, '/licenses')}
+              >
+                My Licenses
+              </a>
+            </li>
           </ul>
         </nav>
       </div>

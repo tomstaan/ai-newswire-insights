@@ -6,12 +6,12 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatDate(dateString: string): string {
+export function formatDate(dateString: string | undefined | null): string {
   if (!dateString) return 'No date available';
   
   try {
     // Validate date format first
-    const timestamp = Date.parse(dateString);
+    const timestamp = Date.parse(String(dateString));
     if (isNaN(timestamp)) {
       console.warn(`Invalid date string: "${dateString}"`);
       return 'No date available';
@@ -41,12 +41,12 @@ export function getRandomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export function formatTimeAgo(dateString: string): string {
+export function formatTimeAgo(dateString: string | undefined | null): string {
   if (!dateString) return 'Unknown time';
   
   try {
     // Validate date format first
-    const timestamp = Date.parse(dateString);
+    const timestamp = Date.parse(String(dateString));
     if (isNaN(timestamp)) {
       console.warn(`Invalid date string for time ago: "${dateString}"`);
       return 'Unknown time';

@@ -23,14 +23,11 @@ const RecommendedStories: React.FC<RecommendedStoriesProps> = ({ stories, curren
   const handleStoryClick = (e: React.MouseEvent<HTMLAnchorElement>, storyId: number) => {
     e.preventDefault();
     
-    // Instead of using window.location which causes a full page reload,
-    // use the navigate function which will trigger a proper React Router navigation
+    // Use the navigate function which will trigger a proper React Router navigation
     navigate(`/story/${storyId}`);
     
-    // Force a reload of page data
-    setTimeout(() => {
-      window.scrollTo(0, 0);
-    }, 100);
+    // Force a scroll to top
+    window.scrollTo(0, 0);
   };
 
   return (
@@ -48,7 +45,7 @@ const RecommendedStories: React.FC<RecommendedStoriesProps> = ({ stories, curren
             const seconds = getRandomInt(10, 59);
             const durationString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
             
-            // CRITICAL: Always use the numeric ID for consistent navigation
+            // Use the numeric ID for consistent navigation
             const storyLink = `/story/${story.id}`;
             
             return (
@@ -84,7 +81,7 @@ const RecommendedStories: React.FC<RecommendedStoriesProps> = ({ stories, curren
                     <div className="flex flex-wrap items-center gap-2 text-xs text-newswire-mediumGray">
                       <div className="flex items-center">
                         <Calendar size={10} className="mr-1" />
-                        {formatDate(story.published_date || '')}
+                        {formatDate(story.published_date)}
                       </div>
                       <Badge 
                         variant="outline" 
@@ -113,10 +110,15 @@ const RecommendedStories: React.FC<RecommendedStoriesProps> = ({ stories, curren
         )}
       </div>
       <div className="p-3 bg-newswire-lightGray/30 flex justify-center border-t border-newswire-lightGray">
-        <a href="/" className="text-xs text-newswire-accent hover:text-newswire-accent/80 font-medium flex items-center" onClick={(e) => {
-          e.preventDefault();
-          navigate('/');
-        }}>
+        <a 
+          href="/" 
+          className="text-xs text-newswire-accent hover:text-newswire-accent/80 font-medium flex items-center"
+          onClick={(e) => {
+            e.preventDefault();
+            navigate('/');
+            window.scrollTo(0, 0);
+          }}
+        >
           View all related videos
           <ExternalLink size={12} className="ml-1" />
         </a>
