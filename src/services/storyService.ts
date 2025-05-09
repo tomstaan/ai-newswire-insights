@@ -1,13 +1,10 @@
+
 import { NewsStory, APIStoryResponse } from '@/types/news';
 import { fetchData } from '@/utils/apiUtils';
-import { getMockData, getMockStoryResult } from '@/utils/mockDataUtils';
 import { transformAPIStory, parseRawApiData } from '@/utils/transformUtils';
 
 // Primary API endpoint using our Vite proxy to avoid CORS issues
 const STORYFUL_API = '/api/newswire/stories';
-
-// Flag to determine if we should use mock data as fallback if API fails
-const USE_MOCK_DATA_AS_FALLBACK = true;
 
 export const fetchStoryById = async (id: string): Promise<{ story: NewsStory; similarStories: NewsStory[] }> => {
   try {
@@ -88,23 +85,11 @@ export const fetchStoryById = async (id: string): Promise<{ story: NewsStory; si
       }
     } catch (apiError) {
       console.error('Storyful API failed:', apiError);
-      
-      if (USE_MOCK_DATA_AS_FALLBACK) {
-        console.log(`Using mock data as fallback for story ID: ${id}`);
-        return getMockStoryResult(id);
-      }
-      
-      throw apiError; // Re-throw if we're not using mock data as fallback
+      throw apiError;
     }
   } catch (error) {
-    console.error('All API attempts failed. Using mock data as last resort.', error);
-    
-    if (USE_MOCK_DATA_AS_FALLBACK) {
-      console.log(`Returning mock story for ID: ${id}`);
-      return getMockStoryResult(id);
-    }
-    
-    throw error; // Re-throw if we're not using mock data as fallback
+    console.error('All API attempts failed.', error);
+    throw error;
   }
 };
 
