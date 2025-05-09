@@ -1,4 +1,3 @@
-
 import { APIStory, APIStoryResponse, NewsStory } from '@/types/news';
 import { toast } from '@/components/ui/use-toast';
 
@@ -137,30 +136,32 @@ export const fetchStoryById = async (id: string): Promise<{ story: NewsStory; si
     console.log(`Fetching story with ID: ${id}`);
     
     try {
-      // Using the same fetchData method that works on the homepage
+      // Use the same fetchData method that works consistently
       const data = await fetchData<APIStoryResponse>(`${API_ENDPOINT}/${id}`);
       
       // If the response has a story property, use that structure
-      if (data.story) {
+      if (data && data.story) {
         return {
           story: transformAPIStory(data.story),
-          similarStories: data.similar_stories?.map(transformAPIStory) || []
+          similarStories: (data.similar_stories || []).map(transformAPIStory)
         };
       } 
       // Otherwise, assume the response is just the story itself
-      else {
+      else if (data) {
         const story = transformAPIStory(data as unknown as APIStory);
         // Try to get similar stories
         try {
           const similarData = await fetchData<APIStory[]>(`${API_ENDPOINT}/${id}/recommendations`);
           return {
             story,
-            similarStories: similarData?.map(transformAPIStory) || []
+            similarStories: (similarData || []).map(transformAPIStory)
           };
         } catch (error) {
           console.error('Error fetching similar stories:', error);
           return { story, similarStories: [] };
         }
+      } else {
+        throw new Error("Invalid API response format");
       }
     } catch (error) {
       console.error('API endpoint failed. Using mock data as fallback.', error);

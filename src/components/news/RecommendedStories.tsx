@@ -2,7 +2,7 @@
 import React from 'react';
 import { NewsStory } from '@/types/news';
 import { formatDate, getRandomInt } from '@/lib/utils';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Clock, Video, Play, Calendar, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -22,8 +22,15 @@ const RecommendedStories: React.FC<RecommendedStoriesProps> = ({ stories, curren
 
   const handleStoryClick = (e: React.MouseEvent<HTMLAnchorElement>, storyId: number) => {
     e.preventDefault();
-    // Force a full navigation to the story page to ensure proper loading
-    window.location.href = `/story/${storyId}`;
+    
+    // Instead of using window.location which causes a full page reload,
+    // use the navigate function which will trigger a proper React Router navigation
+    navigate(`/story/${storyId}`);
+    
+    // Force a reload of page data
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 100);
   };
 
   return (
@@ -77,7 +84,7 @@ const RecommendedStories: React.FC<RecommendedStoriesProps> = ({ stories, curren
                     <div className="flex flex-wrap items-center gap-2 text-xs text-newswire-mediumGray">
                       <div className="flex items-center">
                         <Calendar size={10} className="mr-1" />
-                        {formatDate(story.published_date)}
+                        {formatDate(story.published_date || '')}
                       </div>
                       <Badge 
                         variant="outline" 
@@ -106,10 +113,13 @@ const RecommendedStories: React.FC<RecommendedStoriesProps> = ({ stories, curren
         )}
       </div>
       <div className="p-3 bg-newswire-lightGray/30 flex justify-center border-t border-newswire-lightGray">
-        <Link to="/" className="text-xs text-newswire-accent hover:text-newswire-accent/80 font-medium flex items-center">
+        <a href="/" className="text-xs text-newswire-accent hover:text-newswire-accent/80 font-medium flex items-center" onClick={(e) => {
+          e.preventDefault();
+          navigate('/');
+        }}>
           View all related videos
           <ExternalLink size={12} className="ml-1" />
-        </Link>
+        </a>
       </div>
     </div>
   );

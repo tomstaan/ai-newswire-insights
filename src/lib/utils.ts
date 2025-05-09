@@ -10,13 +10,14 @@ export function formatDate(dateString: string): string {
   if (!dateString) return 'No date available';
   
   try {
-    const date = new Date(dateString);
-    
-    // Check if date is valid
-    if (isNaN(date.getTime())) {
-      return 'Invalid date';
+    // Validate date format first
+    const timestamp = Date.parse(dateString);
+    if (isNaN(timestamp)) {
+      console.warn(`Invalid date string: "${dateString}"`);
+      return 'No date available';
     }
     
+    const date = new Date(timestamp);
     return new Intl.DateTimeFormat('en-US', {
       month: 'long',
       day: 'numeric',
@@ -24,7 +25,7 @@ export function formatDate(dateString: string): string {
     }).format(date);
   } catch (error) {
     console.error('Error formatting date:', error);
-    return 'Invalid date';
+    return 'No date available';
   }
 }
 
@@ -44,13 +45,14 @@ export function formatTimeAgo(dateString: string): string {
   if (!dateString) return 'Unknown time';
   
   try {
-    const date = new Date(dateString);
-    
-    // Check if date is valid
-    if (isNaN(date.getTime())) {
-      return 'Invalid date';
+    // Validate date format first
+    const timestamp = Date.parse(dateString);
+    if (isNaN(timestamp)) {
+      console.warn(`Invalid date string for time ago: "${dateString}"`);
+      return 'Unknown time';
     }
     
+    const date = new Date(timestamp);
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
     
