@@ -1,18 +1,12 @@
+
 import { NewsStory } from '@/types/news';
 import { fetchData } from '@/utils/apiUtils';
-import { getMockData } from '@/utils/mockDataUtils';
 import { transformAPIStory, parseRawApiData } from '@/utils/transformUtils';
 import { getValidCache, saveToCache } from '@/utils/cacheUtils';
 import { toast } from '@/hooks/use-toast';
 
 // Primary API endpoint - using Storyful API via our proxy to avoid CORS issues
 export const STORYFUL_API = '/api/newswire/stories';
-
-// Original direct API URL (might be used for documentation purposes)
-// export const ORIGINAL_STORYFUL_API = 'https://newswire-story-recommendation.staging.storyful.com/api/stories';
-
-// Flag to determine if we should use mock data as fallback if API fails
-const USE_MOCK_DATA_AS_FALLBACK = true;
 
 // Variable to track if we've already shown an API error message
 let hasShownApiErrorMessage = false;
@@ -60,57 +54,24 @@ export const getTopStories = async (forceRefresh: boolean = false): Promise<News
       }
     } catch (apiError) {
       console.error('Storyful API failed:', apiError);
-      
-      if (USE_MOCK_DATA_AS_FALLBACK) {
-        // Return mock data as a fallback
-        console.log('Using mock data as fallback after API failure');
-        const mockStories = Array.from({ length: 10 }, (_, i) => getMockData(200000 + i));
-        
-        // Store mock stories in cache
-        saveToCache(mockStories);
-        
-        // Show API error toast only once per session
-        if (!hasShownApiErrorMessage) {
-          toast({
-            title: "API Connection Issue",
-            description: "Could not connect to the news API. Using sample data temporarily.",
-            variant: "destructive",
-            duration: 5000,
-          });
-          hasShownApiErrorMessage = true;
-        }
-        
-        return mockStories;
-      }
-      
-      throw apiError; // Re-throw if we're not using mock data as fallback
+      throw apiError;
     }
   } catch (error) {
     console.error('All API attempts failed:', error);
     
-    if (USE_MOCK_DATA_AS_FALLBACK) {
-      // Return mock data as a last resort
-      console.log('Using mock data as final fallback');
-      const mockStories = Array.from({ length: 10 }, (_, i) => getMockData(200000 + i));
-      
-      // Store mock stories in cache
-      saveToCache(mockStories);
-      
-      // Show API error message if we haven't already
-      if (!hasShownApiErrorMessage) {
-        toast({
-          title: "API Connection Issue",
-          description: "Could not connect to the news API. Using sample data temporarily.",
-          variant: "destructive",
-          duration: 5000,
-        });
-        hasShownApiErrorMessage = true;
-      }
-      
-      return mockStories;
+    // Show API error message if we haven't already
+    if (!hasShownApiErrorMessage) {
+      toast({
+        title: "API Connection Issue",
+        description: "Could not connect to the news API. Please try again later.",
+        variant: "destructive",
+        duration: 5000,
+      });
+      hasShownApiErrorMessage = true;
     }
     
-    throw error; // Re-throw if we're not using mock data as fallback
+    // Return empty array as last resort
+    return [];
   }
 };
 
