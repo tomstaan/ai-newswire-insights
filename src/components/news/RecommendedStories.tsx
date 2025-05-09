@@ -22,10 +22,8 @@ const RecommendedStories: React.FC<RecommendedStoriesProps> = ({ stories, curren
 
   const handleStoryClick = (e: React.MouseEvent<HTMLAnchorElement>, storyId: number) => {
     e.preventDefault();
-    console.log(`Navigating to recommended story ID: ${storyId}`);
-    
-    // Use navigate for better UX
-    navigate(`/story/${storyId}`);
+    // Force a full navigation to the story page to ensure proper loading
+    window.location.href = `/story/${storyId}`;
   };
 
   return (

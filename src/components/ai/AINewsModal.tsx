@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, MessageSquare, Code, ChevronRight, ChevronLeft, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -57,8 +58,6 @@ const AINewsModal: React.FC<AINewsModalProps> = ({ open, onClose, initialMessage
   };
 
   const handleNewsCardClick = () => {
-    console.log('News card clicked - closing modal and navigating to story');
-    // Close the modal first to ensure clean navigation
     onClose();
   };
 
@@ -208,7 +207,7 @@ const AINewsModal: React.FC<AINewsModalProps> = ({ open, onClose, initialMessage
                                       style={{ animationDelay: `${i * 150}ms` }}
                                     >
                                       <Link 
-                                        to={`/story/${story.id}`}
+                                        to={`/story/${story.slug}`}
                                         onClick={handleNewsCardClick}
                                       >
                                         <div className="h-36 bg-newswire-lightGray overflow-hidden">

@@ -1,9 +1,9 @@
+
 export interface NewsStory {
   id: number;
   title: string;
   slug: string;
   summary: string;
-  extended_summary?: string;
   published_date: string;
   updated_at: string;
   editorial_updated_at: string;
@@ -30,17 +30,6 @@ export interface NewsStory {
   video_providing_partner?: boolean;
   stated_location?: string;
   media_url?: string;
-  provider_url?: string;
-  categories?: string[];
-  collections?: string[];
-  channels?: string[];
-  keywords?: string[];
-  total_downloads?: number;
-  total_views?: number;
-  unique_downloads?: number;
-  unique_views?: number;
-  title_date?: string;
-  story_mark_guidance?: string;
 }
 
 export interface APIStoryResponse {

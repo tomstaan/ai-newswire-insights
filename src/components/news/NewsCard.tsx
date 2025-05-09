@@ -6,7 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { NewsStory } from '@/types/news';
 import { formatDate, getRandomInt } from '@/lib/utils';
-import { toast } from '@/components/ui/use-toast';
 
 interface NewsCardProps {
   story: NewsStory;
@@ -25,14 +24,9 @@ const NewsCard: React.FC<NewsCardProps> = ({ story, variant = 'default', size })
   
   const handleStoryClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    console.log(`Navigating to story ID: ${story.id}`);
-    
-    // Using navigate to handle the navigation
-    navigate(`/story/${story.id}`);
+    // Force a full navigation to ensure proper loading
+    window.location.href = `/story/${story.id}`;
   };
-  
-  // Debug story data
-  console.log('Rendering NewsCard with story:', story);
   
   const getClearanceBadge = (clearance: string) => {
     switch (clearance) {
